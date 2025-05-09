@@ -1,24 +1,27 @@
-html {
+/* Reset de base */
+html, body {
+  height: 100%; /* Assure que le body occupe toute la hauteur de la page */
+  margin: 0; /* Retire les marges par défaut */
   font-family: Avenir, Helvetica, Arial, sans-serif;
   -webkit-font-smoothing: antialiased;
   -moz-osx-font-smoothing: grayscale;
   text-align: center;
   color: #2c3e50;
+  display: flex;
+  flex-direction: column; /* Permet à body de s'étendre verticalement */
 }
 
-body {
-  margin: 0;
+/* Conteneur principal de la page */
+.main {
+  min-height: 100vh; /* Permet de s'assurer que le main prend toute la hauteur de la fenêtre */
   display: flex;
   flex-direction: column;
-  min-height: 100vh;
 }
 
-.main {
-  flex: 1;
-}
-
+/* Classe pour background général (page entière) */
 .bg-dark {
   background-color: #12002b;
+  flex: 1; /* Prend tout l'espace restant */
 }
 
 .sr-only {
@@ -35,6 +38,7 @@ body {
   white-space: nowrap !important; /* 3 */
 }
 
+/* Navbar */
 .main-nav {
   display: flex;
   justify-content: space-between;
@@ -70,6 +74,7 @@ body {
   width: 200px;
 }
 
+/* Hero section */
 .hero {
   background-image: url('../my-react-app/public/img/bank-tree.webp');
   background-position: 0 -50px;
@@ -123,6 +128,7 @@ body {
   }
 }
 
+/* Features section */
 .features {
   display: flex;
   flex-direction: column;
@@ -153,6 +159,7 @@ body {
   margin-bottom: 0.5rem;
 }
 
+/* Sign-In Form */
 .sign-in-button {
   display: block;
   width: 100%;
@@ -202,11 +209,14 @@ body {
   font-size: 1.2rem;
 }
 
+/* Footer */
 .footer {
   display: flex;
   justify-content: center;
+  align-items: center;
   border-top: 2px solid #ccc;
   padding: 2rem 0 1.5rem;
+  margin-top: auto; /* Permet de garder le footer collé en bas */
 }
 
 .footer-text {
@@ -214,6 +224,7 @@ body {
   padding: 0;
 }
 
+/* Account section */
 .account {
   display: flex;
   justify-content: space-between;

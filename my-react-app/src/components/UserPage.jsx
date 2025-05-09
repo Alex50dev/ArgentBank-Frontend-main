@@ -1,8 +1,21 @@
-// src/components/UserPage.jsx
 import React from 'react';
-import '../../../css/main.css';  // Assure-toi d'importer le CSS associé
+import { useSelector, useDispatch } from 'react-redux';
+import { logOut } from '../Redux/userSlice'; // Action Redux pour déconnecter l'utilisateur
+import '../../../css/main.css';
 
 function UserPage() {
+  const dispatch = useDispatch();
+  const { isAuthenticated, userInfo } = useSelector((state) => state.user);
+
+  // Fonction de déconnexion
+  const handleLogout = () => {
+    dispatch(logOut());  // Action Redux pour déconnecter l'utilisateur
+  };
+
+  if (!isAuthenticated) {
+    return <p>You need to sign in to view this page.</p>;
+  }
+
   return (
     <div>
       {/* Navbar */}
@@ -17,24 +30,22 @@ function UserPage() {
         </a>
         <div>
           <a className="main-nav-item" href="/user">
-            <i className="fa fa-user-circle"></i> Tony
+            <i className="fa fa-user-circle"></i> {userInfo.name}
           </a>
-          <a className="main-nav-item" href="/sign-in">
+          <button onClick={handleLogout} className="main-nav-item">
             <i className="fa fa-sign-out"></i> Sign Out
-          </a>
+          </button>
         </div>
       </nav>
 
-      {/* Main Content */}
-      <main className="main bg-dark">
+      {/* User Profile */}
+      <main className="main">
         <div className="header">
-          <h1>Welcome back<br />Tony Jarvis!</h1>
+          <h1>Welcome back, {userInfo.name}!</h1>
           <button className="edit-button">Edit Name</button>
         </div>
 
         <h2 className="sr-only">Accounts</h2>
-
-        {/* Account Section */}
         <section className="account">
           <div className="account-content-wrapper">
             <h3 className="account-title">Argent Bank Checking (x8349)</h3>

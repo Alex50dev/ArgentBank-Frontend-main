@@ -1,15 +1,28 @@
-// src/components/SignInPage.jsx
 import React, { useState } from 'react';
-import '../../../css/main.css';  // Assure-toi d'importer le CSS associé
+import { useDispatch } from 'react-redux';
+import { setUser } from '../Redux/userSlice'; // Action Redux pour connecter l'utilisateur
+import { useNavigate } from 'react-router-dom';
+import '../../../css/main.css'; // Assure-toi d'importer le CSS associé
 
 function SignInPage() {
   const [username, setUsername] = useState('');
   const [password, setPassword] = useState('');
   const [rememberMe, setRememberMe] = useState(false);
+  const dispatch = useDispatch();
+  const navigate = useNavigate(); // Utilise useNavigate pour rediriger après connexion
 
   const handleSubmit = (event) => {
     event.preventDefault();
-    // Logic for signing in (you can add API calls here)
+    
+    // Simule l'appel API pour la connexion
+    // Remplace cette logique par un appel API réel
+    const userData = { name: username, email: 'user@example.com' };
+
+    // Dispatch de l'action setUser pour ajouter l'utilisateur au store
+    dispatch(setUser(userData));
+
+    // Redirige vers la page d'accueil ou autre page
+    navigate('/');
   };
 
   return (
@@ -64,7 +77,6 @@ function SignInPage() {
               />
               <label htmlFor="remember-me">Remember me</label>
             </div>
-            {/* Replace the anchor link with a button */}
             <button className="sign-in-button" type="submit">Sign In</button>
           </form>
         </section>

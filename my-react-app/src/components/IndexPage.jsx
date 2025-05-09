@@ -1,24 +1,43 @@
-// src/components/Index.jsx
 import React from 'react';
-import '../../../css/main.css';  // Si tu as un fichier CSS spécifique pour cette page, l'importer ici.
+import { useDispatch, useSelector } from 'react-redux';
+import { Link } from 'react-router-dom';
+import { logOut } from '../Redux/userSlice';
+import '../../../css/main.css'; // Assure-toi d'importer le CSS associé
 
-function Index() {
+function IndexPage() {
+  const dispatch = useDispatch();
+  const { isAuthenticated, userInfo } = useSelector((state) => state.user);
+
+  // Fonction de déconnexion
+  const handleLogout = () => {
+    dispatch(logOut());  // Action Redux pour déconnecter l'utilisateur
+  };
+
   return (
     <div>
       {/* Navbar */}
       <nav className="main-nav">
-        <a className="main-nav-logo" href="/">
+        <Link className="main-nav-logo" to="/">
           <img
             className="main-nav-logo-image"
-            src="./img/argentBankLogo.webp"
+            src="/img/argentBankLogo.webp"
             alt="Argent Bank Logo"
           />
           <h1 className="sr-only">Argent Bank</h1>
-        </a>
+        </Link>
         <div>
-          <a className="main-nav-item" href="/sign-in">
-            <i className="fa fa-user-circle"></i> Sign In
-          </a>
+          {!isAuthenticated ? (
+            <Link className="main-nav-item" to="/sign-in">
+              <i className="fa fa-user-circle"></i> Sign In
+            </Link>
+          ) : (
+            <div>
+              <span className="main-nav-item">Hello, {userInfo.name}</span>
+              <button onClick={handleLogout} className="main-nav-item">
+                <i className="fa fa-sign-out"></i> Sign Out
+              </button>
+            </div>
+          )}
         </div>
       </nav>
 
@@ -38,7 +57,7 @@ function Index() {
         <section className="features">
           <h2 className="sr-only">Features</h2>
           <div className="feature-item">
-            <img src="./img/icon-chat.webp" alt="Chat Icon" className="feature-icon" />
+            <img src="/img/icon-chat.webp" alt="Chat Icon" className="feature-icon" />
             <h3 className="feature-item-title">You are our #1 priority</h3>
             <p>
               Need to talk to a representative? You can get in touch through our
@@ -47,7 +66,7 @@ function Index() {
           </div>
           <div className="feature-item">
             <img
-              src="./img/icon-money.webp"
+              src="/img/icon-money.webp"
               alt="Money Icon"
               className="feature-icon"
             />
@@ -58,7 +77,7 @@ function Index() {
           </div>
           <div className="feature-item">
             <img
-              src="./img/icon-security.webp"
+              src="/img/icon-security.webp"
               alt="Security Icon"
               className="feature-icon"
             />
@@ -79,4 +98,4 @@ function Index() {
   );
 }
 
-export default Index;
+export default IndexPage;
