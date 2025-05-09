@@ -6,21 +6,24 @@ const initialState = {
 };
 
 const userSlice = createSlice({
-    name: 'user',
-    initialState,
-    reducers: {
-      setUser: (state, action) => {
-        state.isAuthenticated = true;
-        state.userInfo = action.payload;
-      },
-      logOut: (state) => {
-        state.isAuthenticated = false;
-        state.userInfo = null;
-      },
+  name: 'user',
+  initialState,
+  reducers: {
+    setUser: (state, action) => {
+      state.isAuthenticated = true;
+      state.userInfo = action.payload;
     },
-  });
-  
-  export const { setUser, logOut } = userSlice.actions;
-  
-  // ✅ La bonne ligne (on exporte le reducer SEUL)
-  export default userSlice.reducer;
+    logOut: (state) => {
+      state.isAuthenticated = false;
+      state.userInfo = null;
+    },
+    updateUserName: (state, action) => {
+      if (state.userInfo) {
+        state.userInfo.name = action.payload;
+      }
+    },
+  },
+});
+
+export const { setUser, logOut, updateUserName } = userSlice.actions;
+export default userSlice.reducer;
