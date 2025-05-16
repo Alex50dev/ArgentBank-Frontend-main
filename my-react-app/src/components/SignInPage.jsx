@@ -1,28 +1,38 @@
 import React, { useState } from 'react';
 import { useDispatch } from 'react-redux';
-import { setUser } from '../Redux/userSlice'; // Action Redux pour connecter l'utilisateur
+import { setUser } from '../Redux/userSlice';  // Action Redux pour connecter l'utilisateur
 import { useNavigate } from 'react-router-dom';
+import axios from 'axios';  // Ajoute l'importation d'axios
 import '../../../css/main.css'; // Assure-toi d'importer le CSS associé
 
 function SignInPage() {
-  const [username, setUsername] = useState('');
+  const [email, setEmail] = useState('');  // Utilisation de l'email de l'utilisateur
   const [password, setPassword] = useState('');
-  const [rememberMe, setRememberMe] = useState(false);
   const dispatch = useDispatch();
   const navigate = useNavigate(); // Utilise useNavigate pour rediriger après connexion
 
-  const handleSubmit = (event) => {
+  const handleSubmit = async (event) => {
     event.preventDefault();
     
-    // Simule l'appel API pour la connexion
-    // Remplace cette logique par un appel API réel
-    const userData = { name: username, email: 'user@example.com' };
+    const userData = {
+      email: email,
+      password: password,
+    };
 
-    // Dispatch de l'action setUser pour ajouter l'utilisateur au store
-    dispatch(setUser(userData));
+    try {
+      // Effectuer l'appel API pour la connexion
+      const response = await axios.post('http://localhost:3001/api/v1/user/login', userData);
+      dispatch(setUser(response.data.body));  // Met à jour le store avec les informations utilisateur
 
-    // Redirige vers la page d'accueil ou autre page
-    navigate('/');
+      // Stockage du token dans le localStorage pour l'utiliser dans les requêtes suivantes
+      localStorage.setItem('token', response.data.token);
+
+      // Redirection vers la page de profil après la connexion réussie
+      navigate('/profile');
+    } catch (error) {
+      console.error('Erreur lors de la connexion:', error);
+      // Gérer l'erreur, par exemple afficher un message à l'utilisateur
+    }
   };
 
   return (
@@ -51,12 +61,12 @@ function SignInPage() {
           <h1>Sign In</h1>
           <form onSubmit={handleSubmit}>
             <div className="input-wrapper">
-              <label htmlFor="username">Username</label>
+              <label htmlFor="email">Email</label>
               <input
-                type="text"
-                id="username"
-                value={username}
-                onChange={(e) => setUsername(e.target.value)}
+                type="email"
+                id="email"
+                value={email}
+                onChange={(e) => setEmail(e.target.value)}
               />
             </div>
             <div className="input-wrapper">
@@ -67,15 +77,6 @@ function SignInPage() {
                 value={password}
                 onChange={(e) => setPassword(e.target.value)}
               />
-            </div>
-            <div className="input-remember">
-              <input
-                type="checkbox"
-                id="remember-me"
-                checked={rememberMe}
-                onChange={() => setRememberMe(!rememberMe)}
-              />
-              <label htmlFor="remember-me">Remember me</label>
             </div>
             <button className="sign-in-button" type="submit">Sign In</button>
           </form>

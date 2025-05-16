@@ -1,6 +1,6 @@
 import React, { useState } from 'react';
 import { useSelector, useDispatch } from 'react-redux';
-import { logOut, updateUserName } from '../Redux/userSlice';  // Importer l'action updateUserName
+import { logOut, updateUserProfile } from '../Redux/userSlice';  // Corriger l'import
 import '../../../css/main.css';
 
 function UserPage() {
@@ -21,7 +21,7 @@ function UserPage() {
   const handleSubmit = (e) => {
     e.preventDefault();
     if (newName && newName !== userInfo.name) {
-      dispatch(updateUserName(newName));  // Met à jour le nom dans Redux
+      dispatch(updateUserProfile({ userName: newName }));  // Utilisation de updateUserProfile
     }
   };
 
