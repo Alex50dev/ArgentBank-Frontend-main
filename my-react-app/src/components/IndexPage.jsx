@@ -41,7 +41,7 @@ function IndexPage() {
         </div>
       </nav>
 
-      <main className="main bg-dark">
+      <main>
         <div className="hero">
           <section className="hero-content">
             <h2 className="sr-only">Promoted Content</h2>
