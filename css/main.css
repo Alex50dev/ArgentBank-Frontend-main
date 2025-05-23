@@ -16,6 +16,7 @@ html, body {
   min-height: 100vh; /* Permet de s'assurer que le main prend toute la hauteur de la fenêtre */
   display: flex;
   flex-direction: column;
+  background-color: #12002b;
 }
 
 /* Classe pour background général (page entière) */

@@ -1,32 +1,41 @@
-import React, { useState } from 'react';
+import React, { useEffect, useState } from 'react';
 import { useSelector, useDispatch } from 'react-redux';
-import { logOut, updateUserProfile } from '../Redux/userSlice';  // Corriger l'import
+import { logOut, getUserProfile, updateUserProfile } from '../Redux/userSlice'; 
 import '../../../css/main.css';
 
 function UserPage() {
   const dispatch = useDispatch();
-  const { isAuthenticated, userInfo } = useSelector((state) => state.user);
-  const [newName, setNewName] = useState(userInfo ? userInfo.name : '');  // Initialiser avec le nom actuel
+  const { isAuthenticated, userInfo, error } = useSelector((state) => state.user);
+  const [newName, setNewName] = useState('');
 
-  // Fonction pour déconnecter l'utilisateur
+  useEffect(() => {
+    if (isAuthenticated && !userInfo) {
+      dispatch(getUserProfile());
+    }
+  }, [isAuthenticated, userInfo, dispatch]);
+
   const handleLogout = () => {
     dispatch(logOut());
   };
 
-  // Fonction pour mettre à jour le nom de l'utilisateur
   const handleNameChange = (e) => {
     setNewName(e.target.value);
   };
 
   const handleSubmit = (e) => {
     e.preventDefault();
-    if (newName && newName !== userInfo.name) {
-      dispatch(updateUserProfile({ userName: newName }));  // Utilisation de updateUserProfile
+    // On vérifie d'abord si userInfo existe et le nom à changer aussi
+    if (userInfo && newName && newName !== (userInfo.userName || userInfo.name)) {
+      dispatch(updateUserProfile(newName));
     }
   };
 
   if (!isAuthenticated) {
     return <p>You need to sign in to view this page.</p>;
+  }
+
+  if (!userInfo) {
+    return <p>Chargement...</p>;
   }
 
   return (
@@ -41,7 +50,9 @@ function UserPage() {
           <h1 className="sr-only">Argent Bank</h1>
         </a>
         <div>
-          <span className="main-nav-item">Hello, {userInfo.name}</span>
+          <span className="main-nav-item">
+            Hello, {userInfo ? (userInfo.userName || userInfo.name) : "Utilisateur"}
+          </span>
           <button onClick={handleLogout} className="main-nav-item">
             <i className="fa fa-sign-out"></i> Sign Out
           </button>
@@ -50,8 +61,13 @@ function UserPage() {
 
       <main className="main">
         <div className="header">
-          <h1>Welcome back, {userInfo.name}!</h1>
-          <button className="edit-button" onClick={() => setNewName(userInfo.name)}>
+          <h1>
+            Welcome back, {userInfo ? (userInfo.userName || userInfo.name) : ""}!
+          </h1>
+          <button
+            className="edit-button"
+            onClick={() => setNewName(userInfo ? (userInfo.userName || userInfo.name) : '')}
+          >
             Edit Name
           </button>
         </div>
@@ -66,13 +82,14 @@ function UserPage() {
                 id="new-name"
                 value={newName}
                 onChange={handleNameChange}
+                placeholder={userInfo ? (userInfo.userName || userInfo.name) : ""}
               />
             </div>
             <button type="submit" className="sign-in-button">Update Name</button>
           </form>
         </section>
 
-        <h2 className="sr-only">Accounts</h2>
+        {/* Exemples de comptes */}
         <section className="account">
           <div className="account-content-wrapper">
             <h3 className="account-title">Argent Bank Checking (x8349)</h3>
@@ -93,7 +110,6 @@ function UserPage() {
             <button className="transaction-button">View transactions</button>
           </div>
         </section>
-
         <section className="account">
           <div className="account-content-wrapper">
             <h3 className="account-title">Argent Bank Credit Card (x8349)</h3>
@@ -105,7 +121,6 @@ function UserPage() {
           </div>
         </section>
       </main>
-
       <footer className="footer">
         <p className="footer-text">Copyright 2020 Argent Bank</p>
       </footer>

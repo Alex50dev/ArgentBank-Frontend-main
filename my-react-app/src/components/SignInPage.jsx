@@ -1,43 +1,45 @@
 import React, { useState } from 'react';
 import { useDispatch } from 'react-redux';
-import { setUser } from '../Redux/userSlice';  // Action Redux pour connecter l'utilisateur
+import { setUser, getUserProfile } from '../Redux/userSlice';
 import { useNavigate } from 'react-router-dom';
-import axios from 'axios';  // Ajoute l'importation d'axios
-import '../../../css/main.css'; // Assure-toi d'importer le CSS associé
+import axios from 'axios';
+import '../../../css/main.css';
 
 function SignInPage() {
-  const [email, setEmail] = useState('');  // Utilisation de l'email de l'utilisateur
+  const [email, setEmail] = useState('');
   const [password, setPassword] = useState('');
+  const [errorMsg, setErrorMsg] = useState('');
   const dispatch = useDispatch();
-  const navigate = useNavigate(); // Utilise useNavigate pour rediriger après connexion
+  const navigate = useNavigate();
 
   const handleSubmit = async (event) => {
     event.preventDefault();
-    
-    const userData = {
-      email: email,
-      password: password,
-    };
 
     try {
-      // Effectuer l'appel API pour la connexion
-      const response = await axios.post('http://localhost:3001/api/v1/user/login', userData);
-      dispatch(setUser(response.data.body));  // Met à jour le store avec les informations utilisateur
+      // Connexion utilisateur
+      const response = await axios.post('http://localhost:3001/api/v1/user/login', {
+        email,
+        password,
+      });
 
-      // Stockage du token dans le localStorage pour l'utiliser dans les requêtes suivantes
-      localStorage.setItem('token', response.data.token);
+      const token = response.data.body.token; // Attention : .body.token (Swagger)
+      localStorage.setItem('token', token);
 
-      // Redirection vers la page de profil après la connexion réussie
+      // On set un user vide temporairement puis on récupère le profil via Redux
+      dispatch(setUser({ user: {}, token }));
+
+      // Dispatch Redux pour récupérer le profil et remplir le store (attention, c'est un POST)
+      await dispatch(getUserProfile());
+
       navigate('/profile');
     } catch (error) {
-      console.error('Erreur lors de la connexion:', error);
-      // Gérer l'erreur, par exemple afficher un message à l'utilisateur
+      setErrorMsg("Email ou mot de passe incorrect.");
+      // Pour debug : console.error(error);
     }
   };
 
   return (
     <>
-      {/* Navbar */}
       <nav className="main-nav">
         <a className="main-nav-logo" href="/">
           <img
@@ -54,7 +56,6 @@ function SignInPage() {
         </div>
       </nav>
 
-      {/* Main Sign-In Form */}
       <main className="main bg-dark">
         <section className="sign-in-content">
           <i className="fa fa-user-circle sign-in-icon"></i>
@@ -67,6 +68,8 @@ function SignInPage() {
                 id="email"
                 value={email}
                 onChange={(e) => setEmail(e.target.value)}
+                autoComplete="username"
+                required
               />
             </div>
             <div className="input-wrapper">
@@ -76,14 +79,22 @@ function SignInPage() {
                 id="password"
                 value={password}
                 onChange={(e) => setPassword(e.target.value)}
+                autoComplete="current-password"
+                required
               />
             </div>
-            <button className="sign-in-button" type="submit">Sign In</button>
+            {errorMsg && (
+              <div style={{ color: 'red', marginBottom: '1rem' }}>
+                {errorMsg}
+              </div>
+            )}
+            <button className="sign-in-button" type="submit">
+              Sign In
+            </button>
           </form>
         </section>
       </main>
 
-      {/* Footer */}
       <footer className="footer">
         <p className="footer-text">Copyright 2020 Argent Bank</p>
       </footer>

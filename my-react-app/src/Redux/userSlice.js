@@ -1,10 +1,14 @@
 import { createSlice } from '@reduxjs/toolkit';
 import axios from 'axios';
 
+// Token sauvegardé au reload
+const tokenFromStorage = localStorage.getItem('token');
+
 const initialState = {
-  isAuthenticated: false,
+  isAuthenticated: !!tokenFromStorage,
   userInfo: null,
   error: null,
+  token: tokenFromStorage || null,
 };
 
 const userSlice = createSlice({
@@ -13,11 +17,15 @@ const userSlice = createSlice({
   reducers: {
     setUser: (state, action) => {
       state.isAuthenticated = true;
-      state.userInfo = action.payload;
+      state.userInfo = action.payload.user;
+      state.token = action.payload.token;
+      localStorage.setItem('token', action.payload.token);
     },
     logOut: (state) => {
       state.isAuthenticated = false;
       state.userInfo = null;
+      state.token = null;
+      localStorage.removeItem('token');
     },
     setError: (state, action) => {
       state.error = action.payload;
@@ -27,42 +35,55 @@ const userSlice = createSlice({
 
 export const { setUser, logOut, setError } = userSlice.actions;
 
-// Action pour se connecter
+// LOGIN (POST)
 export const loginUser = (email, password) => async (dispatch) => {
   try {
-    // Utilisation de l'URL correcte pour l'API /user/login
-    const response = await axios.post('http://localhost:3001/api/v1/user/login', { email, password });
-    dispatch(setUser(response.data.body)); // Met à jour le store avec les informations utilisateur
+    const response = await axios.post(
+      'http://localhost:3001/api/v1/user/login',
+      { email, password }
+    );
+    const token = response.data.body.token; // Swagger: token dans body.token
+    localStorage.setItem('token', token);
+    // On ne connaît pas encore l'utilisateur, donc user: {} pour l'instant
+    dispatch(setUser({ user: {}, token }));
+    await dispatch(getUserProfile()); // On récupère le profil juste après
   } catch (error) {
-    dispatch(setError(error.response ? error.response.data : 'Erreur de connexion'));
+    dispatch(setError('Identifiants invalides ou erreur réseau'));
   }
 };
 
-// Action pour récupérer le profil utilisateur
-export const getUserProfile = () => async (dispatch) => {
+// GET PROFILE
+export const getUserProfile = () => async (dispatch, getState) => {
   try {
-    const response = await axios.get('http://localhost:3001/api/v1/user/profile', {
-      headers: {
-        Authorization: `Bearer ${localStorage.getItem('token')}`, // Utilisation du token pour l'authentification
-      },
-    });
-    dispatch(setUser(response.data.body)); // Met à jour les informations du profil
+    const token = getState().user.token || localStorage.getItem('token');
+    if (!token) {
+      dispatch(setError('Token manquant'));
+      return;
+    }
+    const response = await axios.get(
+      'http://localhost:3001/api/v1/user/profile',
+      {
+        headers: { Authorization: `Bearer ${token}` }
+      }
+    );
+    dispatch(setUser({ user: response.data.body, token }));
   } catch (error) {
-    dispatch(setError(error.response ? error.response.data : 'Erreur de récupération du profil'));
+    dispatch(setError('Erreur lors du chargement du profil'));
   }
 };
 
-// Action pour mettre à jour le profil utilisateur
-export const updateUserProfile = (userData) => async (dispatch) => {
+// UPDATE PROFILE (pour changer le nom)
+export const updateUserProfile = (userName) => async (dispatch, getState) => {
   try {
-    const response = await axios.put('http://localhost:3001/api/v1/user/profile', userData, {
-      headers: {
-        Authorization: `Bearer ${localStorage.getItem('token')}`, // Utilisation du token pour l'authentification
-      },
-    });
-    dispatch(setUser(response.data.body)); // Met à jour le profil dans le store
+    const token = getState().user.token || localStorage.getItem('token');
+    const response = await axios.put(
+      'http://localhost:3001/api/v1/user/profile',
+      { userName },
+      { headers: { Authorization: `Bearer ${token}` } }
+    );
+    dispatch(setUser({ user: response.data.body, token }));
   } catch (error) {
-    dispatch(setError(error.response ? error.response.data : 'Erreur de mise à jour du profil'));
+    dispatch(setError('Erreur lors de la modification du profil'));
   }
 };
 
