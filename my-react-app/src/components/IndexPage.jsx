@@ -1,6 +1,6 @@
 import React from 'react';
 import { useSelector, useDispatch } from 'react-redux';
-import { logOut } from '../Redux/userSlice'; // Adapter le chemin si besoin
+import { logOut } from '../Redux/userSlice';
 import '../../../css/main.css';
 
 function IndexPage() {
