@@ -12,29 +12,27 @@ function SignInPage() {
   const dispatch = useDispatch();
   const navigate = useNavigate();
 
+  const API_URL = import.meta.env.VITE_API_URL;
+
   const handleSubmit = async (event) => {
     event.preventDefault();
-
+    setErrorMsg('');
     try {
-      // Connexion utilisateur
-      const response = await axios.post('http://localhost:3001/api/v1/user/login', {
-        email,
-        password,
-      });
-
-      const token = response.data.body.token; // Attention : .body.token (Swagger)
+      // Appel API de connexion
+      const response = await axios.post(`${API_URL}/user/login`, { email, password });
+      const token = response.data.body.token;
       localStorage.setItem('token', token);
 
-      // On set un user vide temporairement puis on récupère le profil via Redux
+      // On setUser avec user vide temporaire (sera peuplé après)
       dispatch(setUser({ user: {}, token }));
 
-      // Dispatch Redux pour récupérer le profil et remplir le store (attention, c'est un POST)
+      // On va chercher les infos du profil avec le token
       await dispatch(getUserProfile());
 
       navigate('/profile');
     } catch (error) {
       setErrorMsg("Email ou mot de passe incorrect.");
-      // Pour debug : console.error(error);
+      // console.error('Erreur de connexion :', error);
     }
   };
 

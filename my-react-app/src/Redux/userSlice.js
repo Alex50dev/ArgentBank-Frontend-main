@@ -1,7 +1,9 @@
 import { createSlice } from '@reduxjs/toolkit';
 import axios from 'axios';
 
-// Token sauvegardé au reload
+// Utilise la variable d'environnement pour l'URL de l'API
+const API_URL = import.meta.env.VITE_API_URL;
+
 const tokenFromStorage = localStorage.getItem('token');
 
 const initialState = {
@@ -39,14 +41,13 @@ export const { setUser, logOut, setError } = userSlice.actions;
 export const loginUser = (email, password) => async (dispatch) => {
   try {
     const response = await axios.post(
-      'http://localhost:3001/api/v1/user/login',
+      `${API_URL}/user/login`,
       { email, password }
     );
-    const token = response.data.body.token; // Swagger: token dans body.token
+    const token = response.data.body.token;
     localStorage.setItem('token', token);
-    // On ne connaît pas encore l'utilisateur, donc user: {} pour l'instant
     dispatch(setUser({ user: {}, token }));
-    await dispatch(getUserProfile()); // On récupère le profil juste après
+    dispatch(getUserProfile());
   } catch (error) {
     dispatch(setError('Identifiants invalides ou erreur réseau'));
   }
@@ -61,7 +62,7 @@ export const getUserProfile = () => async (dispatch, getState) => {
       return;
     }
     const response = await axios.get(
-      'http://localhost:3001/api/v1/user/profile',
+      `${API_URL}/user/profile`,
       {
         headers: { Authorization: `Bearer ${token}` }
       }
@@ -72,12 +73,12 @@ export const getUserProfile = () => async (dispatch, getState) => {
   }
 };
 
-// UPDATE PROFILE (pour changer le nom)
+// UPDATE PROFILE
 export const updateUserProfile = (userName) => async (dispatch, getState) => {
   try {
     const token = getState().user.token || localStorage.getItem('token');
     const response = await axios.put(
-      'http://localhost:3001/api/v1/user/profile',
+      `${API_URL}/user/profile`,
       { userName },
       { headers: { Authorization: `Bearer ${token}` } }
     );
